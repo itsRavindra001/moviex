@@ -30,7 +30,9 @@
     .logo {
         cursor: pointer;
         img {
+            width: 200px;
             height: 50px;
+            float: left;
         }
     }
     .menuItems {
