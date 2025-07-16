@@ -2,67 +2,117 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
-import toast from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import Login from "./Login";
 
 function Signup() {
   const [showSignup, setShowSignup] = useState(true);
+  const [loading, setLoading] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const from = location.state?.from?.pathname || "/";
-  const { register, handleSubmit, formState: { errors } } = useForm();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
 
   const onSubmit = async (data) => {
+    console.log("SUBMIT-FIRED", data); // Debug log
+    setLoading(true);
     const userInfo = {
       fullname: data.fullname,
       email: data.email,
       password: data.password,
     };
+
     try {
-      const res = await axios.post("http://localhost:4001/user/signup", userInfo);
+      const res = await axios.post(
+        "http://localhost:4001/user/signup",
+        userInfo
+      );
       if (res.data) {
-        toast.success("Signup Successfully");
+        toast.success("Signup Successful");
         localStorage.setItem("Users", JSON.stringify(res.data.user));
         navigate(from, { replace: true });
       }
     } catch (err) {
       if (err.response) {
         toast.error("Error: " + err.response.data.message);
+      } else {
+        toast.error("Signup failed");
       }
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div>
+      <Toaster position="top-center" />
       {showSignup && (
         <div className="signup-container">
           <div style={styles.signupBox}>
             <form onSubmit={handleSubmit(onSubmit)} style={styles.form}>
               <Link to="/" style={styles.closeBtn}>✕</Link>
               <h3 style={styles.heading}>Signup</h3>
+
               <div style={styles.inputGroup}>
                 <span>Name</span>
-                <input {...register("fullname", { required: true })} placeholder="Fullname" style={styles.inputField} />
-                {errors.fullname && <span style={styles.errorMessage}>This field is required</span>}
+                <input
+                  type="text"
+                  placeholder="Fullname"
+                  {...register("fullname", { required: true })}
+                  style={styles.inputField}
+                />
+                {errors.fullname && (
+                  <span style={styles.errorMessage}>This field is required</span>
+                )}
               </div>
+
               <div style={styles.inputGroup}>
                 <span>Email</span>
-                <input {...register("email", { required: true })} placeholder="Email" style={styles.inputField} />
-                {errors.email && <span style={styles.errorMessage}>This field is required</span>}
+                <input
+                  type="email"
+                  placeholder="Email"
+                  {...register("email", { required: true })}
+                  style={styles.inputField}
+                />
+                {errors.email && (
+                  <span style={styles.errorMessage}>This field is required</span>
+                )}
               </div>
+
               <div style={styles.inputGroup}>
                 <span>Password</span>
-                <input {...register("password", { required: true })} placeholder="Password" style={styles.inputField} />
-                {errors.password && <span style={styles.errorMessage}>This field is required</span>}
+                <input
+                  type="password"
+                  placeholder="Password"
+                  {...register("password", { required: true, minLength: 6 })}
+                  style={styles.inputField}
+                />
+                {errors.password && (
+                  <span style={styles.errorMessage}>
+                    Password must be at least 6 characters
+                  </span>
+                )}
               </div>
+
               <div style={styles.buttonGroup}>
-                <button type="submit" style={styles.signupButton}>Signup</button>
+                <button type="submit" style={styles.signupButton} disabled={loading}>
+                  {loading ? "Signing up..." : "Signup"}
+                </button>
                 <p>
                   Have an account?{" "}
-                  <button type="button" style={styles.loginButton} onClick={() => {
-                    setShowSignup(false);
-                    document.getElementById("my_modal_3").showModal();
-                  }}>
+                  <button
+                    type="button"
+                    style={styles.loginButton}
+                    onClick={() => {
+                      setShowSignup(false);
+                      document.getElementById("my_modal_3")?.showModal(); // modal should exist
+                    }}
+                  >
                     Login
                   </button>
                 </p>
@@ -71,6 +121,7 @@ function Signup() {
           </div>
         </div>
       )}
+
       {/* Login Modal */}
       <Login onClose={() => setShowSignup(true)} />
     </div>
@@ -85,6 +136,7 @@ const styles = {
     borderRadius: "8px",
     boxShadow: "0 0 20px rgba(0, 0, 0, 0.1)",
     margin: "50px auto",
+    position: "relative",
   },
   form: {
     width: "100%",
@@ -92,7 +144,7 @@ const styles = {
   closeBtn: {
     position: "absolute",
     top: "10px",
-    right: "10px",
+    right: "15px",
     fontSize: "20px",
     color: "#999",
     textDecoration: "none",
@@ -122,7 +174,7 @@ const styles = {
     textAlign: "center",
   },
   signupButton: {
-    backgroundColor: "pink",
+    backgroundColor: "graan",
     color: "white",
     border: "none",
     padding: "10px 20px",
