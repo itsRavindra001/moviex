@@ -174,7 +174,7 @@ const styles = {
     textAlign: "center",
   },
   signupButton: {
-    backgroundColor: "graan",
+    backgroundColor: "007bff",
     color: "white",
     border: "none",
     padding: "10px 20px",
